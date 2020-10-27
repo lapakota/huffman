@@ -1,34 +1,43 @@
 import hashlib
 import pickle
+
 from text_commands import TextCommands
 
 
 class HuffmanDecoding:
-    def __init__(self, path, help_path):
+    def __init__(self, path):
         self.path = path
-        self.help_path = help_path
         self.nodes_heap = []
-        self.pickle = pickle.load(open(self.help_path, 'rb'))
-        self.decode_huff_map = self.pickle[0]
-        self.filename = self.pickle[1]
-        self.file_extension = self.pickle[2]
-        self.hash = self.pickle[3]
+        self.decode_huff_map = 0
+        self.filename = 0
+        self.file_extension = 0
+        self.hash = 0
 
     def decode_file(self):
-        output_path = self.filename + "_decoded" + self.file_extension
-
+        output_path = ''
         try:
-            with open(self.path, 'rb') as file, open(output_path, 'w') as output:
+            with open(self.path, 'rb') as file:
+                file_data = pickle.load(file)
+                decode_info = pickle.load(file)
+
+                self.decode_huff_map = decode_info[0]
+                self.filename = decode_info[1]
+                self.file_extension = decode_info[2]
+                self.hash = decode_info[3]
+
                 bit_string = ""
-                byte = file.read(1)
-                while len(byte) > 0:
-                    byte = ord(byte)
+
+                for byte in file_data:
                     # перевод в бинарный вид и добивание нулями слева до длины байта
                     bits = bin(byte)[2:].rjust(8, '0')
                     bit_string += bits
-                    byte = file.read(1)
+
                 encoded_text = self.remove_extras(bit_string)
                 decoded_text = self.decode_text(encoded_text)
+
+            output_path = self.filename + "_decoded" + self.file_extension
+
+            with open(output_path, 'w') as output:
                 output.write(decoded_text)
         except Exception as e:
             TextCommands.print_message_with_exit(e)
@@ -36,9 +45,9 @@ class HuffmanDecoding:
         TextCommands.print_final_message('Decoding', output_path)
 
         if self.hash == hashlib.md5(decoded_text.encode('utf-8')).hexdigest():
-            TextCommands.print_message_with_exit("Integrity in normal state")
+            print("Integrity in normal state")
         else:
-            TextCommands.print_message_with_exit("Some errors with integrity")
+            print("Some errors with integrity")
 
     @staticmethod
     def remove_extras(extra_encoded_text):

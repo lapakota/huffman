@@ -24,7 +24,7 @@ class HuffmanEncoding:
         output_path = self.filename + self.huff_extension
 
         try:
-            with open(self.path, 'r+') as file, open(output_path, 'wb') as output:
+            with open(self.path, 'r') as file, open(output_path, 'wb') as output:
                 text = ''
                 try:
                     text = file.read()
@@ -42,18 +42,12 @@ class HuffmanEncoding:
                 encoded_text = ''.join([self.encode_huff_map[c] for c in text])
                 # дополненный текст
                 extra_encoded_text = self.format_encoded_text(encoded_text)
-
                 b = self.get_byte_array(extra_encoded_text)
-                output.write(bytes(b))
+
+                pickle.dump(bytes(b), output)
+                pickle.dump((self.decode_huff_map, self.filename, self.file_extension, self.hash), output)
         except Exception as e:
             TextCommands.print_message_with_exit(e)
-        # with open(output_path, 'ab+') as output:
-        #     output.seek(0)
-        #     info = pickle.dumps((self.decode_huff_map, self.filename, self.file_extension, self.hash))
-        #     output.write(info)
-        #     output.write('\n'.encode())
-        pickle.dump((self.decode_huff_map, self.filename, self.file_extension, self.hash),
-                    open(self.filename + '.help', 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         TextCommands.print_final_message('Encoding', output_path)
 
     @staticmethod
