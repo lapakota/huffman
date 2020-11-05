@@ -7,7 +7,6 @@ from node import Node
 from text_commands import TextCommands
 
 
-# если считать бинарник и проиттерироваться по строке то будут инты, как из них снова получить исходную строку?
 class HuffmanEncoding:
     def __init__(self, path):
         self.path = path
@@ -18,21 +17,26 @@ class HuffmanEncoding:
         self.file_extension = ''
         self.huff_extension = ".huf"
         self.hash = 0
+        self.is_bin = False
 
     def encode_file(self):
         self.filename, self.file_extension = os.path.splitext(self.path)
         output_path = self.filename + self.huff_extension
+        self.is_bin = self.is_binary()
+        mode = 'r' if not self.is_bin else 'rb'
+        access_time = os.stat(self.path).st_atime
+        modify_time = os.stat(self.path).st_mtime
 
         try:
-            with open(self.path, 'r') as file, open(output_path, 'wb') as output:
+            with open(self.path, mode) as file, open(output_path, 'wb') as output:
                 text = ''
                 try:
                     text = file.read()
                 except Exception as e:
                     TextCommands.print_message_with_exit(e)
-                self.hash = hashlib.md5(text.encode('utf-8')).hexdigest()
 
-                TextCommands.check_empty_file(text)
+                self.hash = hashlib.md5(text).hexdigest() if self.is_bin\
+                    else hashlib.md5(text.encode('utf-8')).hexdigest()
 
                 frequency = self.make_frequency_dict(text)
                 self.make_heap(frequency)
@@ -45,10 +49,25 @@ class HuffmanEncoding:
                 b = self.get_byte_array(extra_encoded_text)
 
                 pickle.dump(bytes(b), output)
-                pickle.dump((self.decode_huff_map, self.filename, self.file_extension, self.hash), output)
+                pickle.dump((self.decode_huff_map,
+                             self.filename,
+                             self.file_extension,
+                             self.hash,
+                             self.is_bin,
+                             access_time,
+                             modify_time),
+                            output)
         except Exception as e:
             TextCommands.print_message_with_exit(e)
         TextCommands.print_final_message('Encoding', output_path)
+
+    def is_binary(self):
+        try:
+            with open(self.path, 'tr') as check_file:
+                check_file.read()
+                return False
+        except:
+            return True
 
     @staticmethod
     def make_frequency_dict(text):
@@ -106,7 +125,6 @@ class HuffmanEncoding:
             return
 
         if root.char is not None:
-            # bytes([root.char])
             self.encode_huff_map[root.char] = current_code
             self.decode_huff_map[current_code] = root.char
             return
