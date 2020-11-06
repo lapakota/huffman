@@ -29,7 +29,7 @@ class HuffmanEncoding:
 
         try:
             with open(self.path, mode) as file, open(output_path, 'wb') as output:
-                text = ''
+                text = b''
                 try:
                     text = file.read()
                 except Exception as e:
@@ -66,7 +66,7 @@ class HuffmanEncoding:
             with open(self.path, 'tr') as check_file:
                 check_file.read()
                 return False
-        except:
+        except UnicodeDecodeError:
             return True
 
     @staticmethod
