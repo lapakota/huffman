@@ -12,7 +12,7 @@ python main.py --encode_dir popka
 
 Декодирование:
 
-python main.py --decode war-and-peace.txt
+python main.py --decode war-and-peace.huf
 
 Для директории: 
 python main.py --decode_dir popka
