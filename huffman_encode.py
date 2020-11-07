@@ -20,24 +20,15 @@ class HuffmanEncoding:
         self.is_bin = False
 
     def encode_file(self):
-        self.filename, self.file_extension = os.path.splitext(self.path)
-        output_path = self.filename + self.huff_extension
-        self.is_bin = self.is_binary()
-        mode = 'r' if not self.is_bin else 'rb'
-        access_time = os.stat(self.path).st_atime
-        modify_time = os.stat(self.path).st_mtime
-
+        self.filename, self.file_extension, output_path, \
+        self.is_bin, mode, access_time, modify_time \
+            = self.load_data()
+        self.check_huf_file()
         try:
             with open(self.path, mode) as file, open(output_path, 'wb') as output:
-                text = b''
-                try:
-                    text = file.read()
-                except Exception as e:
-                    TextCommands.print_message_with_exit(e)
-
-                self.hash = hashlib.md5(text).hexdigest() if self.is_bin\
-                    else hashlib.md5(text.encode('utf-8')).hexdigest()
-
+                text = file.read()
+                self.hash = hashlib.md5(text if self.is_bin
+                                        else text.encode('utf-8')).hexdigest()
                 frequency = self.make_frequency_dict(text)
                 self.make_heap(frequency)
                 self.merge_nodes()
@@ -57,9 +48,23 @@ class HuffmanEncoding:
                              access_time,
                              modify_time),
                             output)
+                TextCommands.print_final_message('Encoding', output_path)
         except Exception as e:
             TextCommands.print_message_with_exit(e)
-        TextCommands.print_final_message('Encoding', output_path)
+
+    def check_huf_file(self):
+        if self.file_extension == self.huff_extension:
+            TextCommands.print_message_with_exit("Can't compress already compressed file")
+
+    def load_data(self):
+        filename, file_extension = os.path.splitext(self.path)
+        output_path = filename + self.huff_extension
+        is_bin = self.is_binary()
+        mode = 'r' if not is_bin else 'rb'
+        access_time = os.stat(self.path).st_atime
+        modify_time = os.stat(self.path).st_mtime
+        return filename, file_extension, output_path, \
+               is_bin, mode, access_time, modify_time
 
     def is_binary(self):
         try:
