@@ -4,8 +4,6 @@
 
 Тесты в файле test_huffman.py
 
-Примеры запуска:
-
 # Кодирование:
 
 python main.py --encode 256.ansi
