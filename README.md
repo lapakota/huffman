@@ -14,11 +14,11 @@ python main.py --encode audio.wav
 
 python main.py --encode video.mp4
 
-# Для директории: 
+Для директории: 
 
 python main.py --encode_dir popka
 
-Декодирование:
+# Декодирование:
 
 python main.py --decode 256.huf
 
